@@ -28,7 +28,7 @@ char *name_file_B;
 
 void launch_next( )
 {
-	int ecnt = 10; // max tries
+	int ecnt = 10000; // max tries
 	while ( ecnt-- )
 	{
 		int pid_next = 0; pid_t catched_pid;
@@ -61,7 +61,7 @@ void launch_next( )
 			// exit find
 			break;
 		}
-		puts("wait");
+		//puts("wait");
 	}
 	
 	// print error??
