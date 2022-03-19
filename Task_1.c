@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 
-void printCurTime ()
+void printCurTime ( const char *string_at )
 {
 	// time vars
 	struct timeval tv_now;
@@ -15,14 +16,11 @@ void printCurTime ()
 	int mins  = (tv_now.tv_sec / 60) % 60;
 	int hrs   = (tv_now.tv_sec / 3600 + 3) % 24; // +3 is gmt
 	// print time
-	printf("time now %02d:%02d:%02d:%03d\n", hrs, mins, secs, msecs );
+	printf("%s. My PID is %d, parents PID is %d. time now %02d:%02d:%02d:%03d\n", string_at, getpid(), getppid(),
+		hrs, mins, secs, msecs );
 	
 }
 
-void printPIDs ()
-{
-	printf("My PID is %d, parents PID is %d\n", getpid(), getppid()); 
-}
 
 int waitForExit(pid_t pid, int pnum)
 {
@@ -39,38 +37,41 @@ int main()
 {
 	pid_t pid_self, pid_child_1 = 0, pid_child_2 = 0;
 	
-	if (( pid_child_1 = fork() ) && ( pid_child_2 = fork() ))
+	if ((( pid_child_1 = fork() ) > 0) && (( pid_child_2 = fork() ) > 0)) // always true for parent
 	{
-		// check if succeed			
-		if (pid_child_1 >= 0 && pid_child_2 >= 0)
-		{
-			// at parent
-			printf("> at parent ");
-			printCurTime();
-			printPIDs ();
+		// at parent
+		printCurTime("> at parent");
 			
-			// call ps -x
-			system( "ps -x" );
+		// call ps -x
+		system( "ps -x" );
 			
-			// wait for process to end
-			waitForExit( pid_child_1, 1 );
-			waitForExit( pid_child_2, 2 );
-		}
+		// wait for process to end
+		waitForExit( pid_child_1, 1 );
+		waitForExit( pid_child_2, 2 );
 	}
 	else if (pid_child_1 == 0)
 	{
 		// at 1st child
-		printf("> at 1st child ");
-		printCurTime();
-		printPIDs ();
+		printCurTime("> at 1st child");
 	}
-	else
+	else if (pid_child_2 == 0)
 	{
 		// at 2nd child
-		printf("> at 2nd child ");
-		printCurTime();
-		printPIDs ();
+		printCurTime("> at 2nd child");
+	} 
+	else if (pid_child_2 < 0)
+	{
+		// error create 2nd child
+		perror("error create 2nd child");
+		waitForExit( pid_child_1, 1 );
+	} 
+	else 
+	{
+		// error create 1st child
+		perror("error create 2nd child");
+	
 	}
+	
 
 	return 0;
 }
