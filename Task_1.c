@@ -37,7 +37,7 @@ int main()
 {
 	pid_t pid_self, pid_child_1 = 0, pid_child_2 = 0;
 	
-	if ((( pid_child_1 = fork() ) > 0) && (( pid_child_2 = fork() ) > 0)) // always true for parent
+	if ((( pid_child_1 = fork() ) > 0) && (( pid_child_2 = fork() ) > 0)) // always true for parent (all forks succeed)
 	{
 		// at parent
 		printCurTime("> at parent");
@@ -65,10 +65,10 @@ int main()
 		perror("error create 2nd child");
 		waitForExit( pid_child_1, 1 );
 	} 
-	else 
+	else if (pid_child_1 < 0)
 	{
 		// error create 1st child
-		perror("error create 2nd child");
+		perror("error create 1st child");
 	
 	}
 	
