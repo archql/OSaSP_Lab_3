@@ -39,7 +39,7 @@ void launch_next()
 	{
 		// were in parent -- queue waits and encount launched forks
 	}
-	else*/ 
+	else*/
 	if ( !pid )
 	{
 		// were in child -- do cmp here
@@ -48,7 +48,7 @@ void launch_next()
 			myerror("Error occured while doing a comparation!");
 		}
 	}	
-	else 
+	else if ( pid < 0 )
 	{
 		// ERROR cant create fork
 		puts( "ERROR cant create fork");
@@ -97,8 +97,11 @@ int main( int argc, char *argv[] )
 	// get dir B
 	DIR * dir_B = opendir( argv[2] );  
 	// try dir
-	if (!dir_B)
+	if (!dir_B) 
+	{
+		closedir(dir_A);
 		myerror("Wrong args! Format: 2nd param is [dir B]");	
+	}
 		
 	// setup file base pathes
 	strcpy(name_file_A_full, argv[1] );
