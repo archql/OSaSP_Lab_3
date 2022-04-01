@@ -28,7 +28,14 @@ void launch_next()
 	if ( arr_pids_next >= arr_pids_len ) // not enough place to create new process
 	{
 		// wait for somebody
-		wait(NULL);
+		if ( wait(NULL) == -1 )
+		{
+			perror("Cant wait for process");
+			arr_pids_len--;
+			arr_pids_next--;
+			
+			return;
+		}
 		// dec ctr
 		arr_pids_next--;
 	}
@@ -40,7 +47,7 @@ void launch_next()
 		// were in parent -- queue waits and encount launched forks
 	}
 	else*/
-	if ( !pid )
+	if ( pid == 0 )
 	{
 		// were in child -- do cmp here
 		if ( execlp("./Task_cmp.exe", "Task_cmp.exe", name_file_A_full, name_file_B_full, NULL) == -1);
@@ -61,20 +68,22 @@ void wait_for_all_pids()
 	for ( int i = arr_pids_next; i > 0; i-- ) // end all processes
 	{
 		// wait for somebody
-		wait(NULL);
+		if ( wait(NULL) == -1 )
+		{
+			perror("Cant wait for process!");
+		}
 	}
 }
 
 
 void cmp_files( struct dirent *dirent_A, struct dirent *dirent_B )
 {
-	// get file names
-	strcpy(name_file_A, dirent_A->d_name);
-	strcpy(name_file_B, dirent_B->d_name);
-	
 	// This can be replaced with more eff?? check in while loop
 	if ( !(dirent_A->d_type & DT_REG) || !(dirent_B->d_type & DT_REG) ) // if not files
 		return;
+	// get file names
+	strcpy(name_file_A, dirent_A->d_name);
+	strcpy(name_file_B, dirent_B->d_name);
 	
 	launch_next( name_file_A, name_file_B );
 }
@@ -115,7 +124,7 @@ int main( int argc, char *argv[] )
 		
 	// === find loop ===
 	struct dirent *dirent_A, *dirent_B;
-	// alloc array for pids
+	// set cnt for all processes
 	arr_pids_next = 0;
 	
 	// run for all files in dir
